@@ -20,7 +20,7 @@ using namespace std;
  * Description: Determine how close these two objects will
  *   get in between the frames.
  **********************************************************/
-/*
+
 float Game :: getClosestDistance(const FlyingObject &obj1, const FlyingObject &obj2) const
 {
    // find the maximum distance traveled
@@ -47,5 +47,4 @@ float Game :: getClosestDistance(const FlyingObject &obj1, const FlyingObject &o
    
    return sqrt(distMin);
 }
-*/
 

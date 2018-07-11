@@ -9,6 +9,9 @@
 
 
 // Put your Ship class here
+class Ship
+{
 
+};
 
 #endif /* ship_h */

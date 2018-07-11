@@ -13,9 +13,28 @@
 
 // Define the following classes here:
 //   Rock
+class Rock
+{
+
+};
+
 //   BigRock
+class BigRock
+{
+
+};
+
 //   MediumRock
+class MediumRock
+{
+
+};
+
 //   SmallRock
+class SmallRock
+{
+
+};
 
 
 
