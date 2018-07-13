@@ -7,16 +7,32 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include "flyingObject.h"
+#include <vector>
+
+#include "uiDraw.h"
+#include "uiInteract.h"
+#include "point.h"
+#include "velocity.h"
+
+#include "bullet.h"
+#include "rocks.h"
+#include "ship.h"
 
 class Game
 {
 private:
+	Point topLeft;
+	Point bottomRight;
+
+	Ship ship;
+	std::vector<Bullet> bullets;
+
+	// TODO: rocks
 
 public:
-	Game(Point topLeft, Point topRight);
+	Game(Point topLeft, Point bottomRight);
 
-	float getClosestDistance(const FlyingObject &obj1, const FlyingObject &obj2) const;
+	float getClosestDistance(FlyingObject &obj1, FlyingObject &obj2) const;
 	void advance();
 	void handleInput(const Interface &pUI);
 	void draw(const Interface &pUI);

@@ -9,31 +9,40 @@
 #define MEDIUM_ROCK_SPIN 5
 #define SMALL_ROCK_SPIN 10
 
-
+# include "flyingObject.h"
 
 // Define the following classes here:
 //   Rock
-class Rock
+class Rock : FlyingObject
 {
-
+protected:
+	int rotation;
+public:
+	int getRotation() const { return this->rotation; }
+	void setRotation(const int rotation) { this->rotation = rotation; }
 };
 
 //   BigRock
-class BigRock
+class BigRock : Rock
 {
+private:
 
+public:
+	BigRock();
 };
 
 //   MediumRock
-class MediumRock
+class MediumRock : Rock
 {
-
+public:
+	MediumRock();
 };
 
 //   SmallRock
-class SmallRock
+class SmallRock : Rock
 {
-
+public:
+	SmallRock();
 };
 
 

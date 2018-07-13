@@ -7,11 +7,58 @@
 
 #include "game.h"
 
+#include <vector>
+#include <cassert>
+
 // These are needed for the getClosestDistance function...
 #include <limits>
 #include <algorithm>
 using namespace std;
 
+/***************************************
+* TODO: GAME CONSTRUCTOR
+***************************************/
+Game::Game(Point tl, Point br)
+	: topLeft(tl), bottomRight(br)
+{
+	
+}
+
+/***************************************
+* GAME :: ADVANCE
+* advance the game one unit of time
+***************************************/
+void Game::advance()
+{
+	advanceBullets();
+	advanceShip();
+
+	handleCollisions();
+	cleanUpZombies();
+}
+
+/***************************************
+* GAME :: ADVANCE BULLETS
+* Go through each bullet and advance it.
+***************************************/
+void Game::advanceBullets()
+{
+	// Move each of the bullets forward if it is alive
+	for (int i = 0; i < bullets.size(); i++)
+	{
+		if (bullets[i].isAlive())
+		{
+			// this bullet is alive, so tell it to move forward
+			bullets[i].advance();
+
+			if (!isOnScreen(bullets[i].getPoint()))
+			{
+				// the bullet has left the screen
+				bullets[i].kill();
+			}
+		}
+	}
+}
 
 // You may find this function helpful...
 
@@ -21,7 +68,7 @@ using namespace std;
  *   get in between the frames.
  **********************************************************/
 
-float Game :: getClosestDistance(const FlyingObject &obj1, const FlyingObject &obj2) const
+float Game :: getClosestDistance(FlyingObject &obj1, FlyingObject &obj2) const
 {
    // find the maximum distance traveled
    float dMax = max(abs(obj1.getVelocity().getDx()), abs(obj1.getVelocity().getDy()));
