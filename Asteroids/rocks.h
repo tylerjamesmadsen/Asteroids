@@ -13,38 +13,47 @@
 
 // Define the following classes here:
 //   Rock
-class Rock : FlyingObject
+class Rock : public FlyingObject
 {
 protected:
 	int rotation;
+	int radius;
 public:
 	int getRotation() const { return this->rotation; }
 	void setRotation(const int rotation) { this->rotation = rotation; }
+	int getRadius() const { return this->radius; }
+	void setRadius(const int radius) { this->radius = radius; }
+	void draw();
+	virtual std::string hit() = 0;
 };
 
 //   BigRock
-class BigRock : Rock
+class BigRock : public Rock
 {
 private:
 
 public:
 	BigRock();
+	void draw();
+	std::string hit();
 };
 
 //   MediumRock
-class MediumRock : Rock
+class MediumRock : public Rock
 {
 public:
-	MediumRock();
+	MediumRock(const Point point, const Velocity velocity);
+	void draw();
+	std::string hit();
 };
 
 //   SmallRock
-class SmallRock : Rock
+class SmallRock : public Rock
 {
 public:
-	SmallRock();
+	SmallRock(const Point point, const Velocity velocity);
+	void draw();
+	std::string hit();
 };
-
-
 
 #endif /* rocks_h */

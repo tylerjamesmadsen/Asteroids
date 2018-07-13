@@ -14,14 +14,19 @@ private:
 	//Point point;
 	//bool alive;
 
+	int life = 40;
 	float orientation;
 public:
 	Bullet();
 	Bullet(Velocity velocity, const Point point, const float orientation);
 
-	void fire(Point point, float angle);
+	int getLife() const { return this->life; }
+	void setLife(const int life) { this->life = life; }
+	float getOrientation() const { return this->orientation; }
+	void setOrientation(const float orientation) { this->orientation = orientation; }
+
+	void fire(Point point, Velocity shipVelocity, float angle);
 	void draw();
 };
-
 
 #endif /* bullet_h */

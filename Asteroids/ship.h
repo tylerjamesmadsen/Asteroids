@@ -9,11 +9,12 @@
 #include "flyingObject.h"
 
 // Put your Ship class here
-class Ship : FlyingObject
+class Ship : public FlyingObject
 {
 private:
 	int orientation;
 	bool thrust;
+	const int radius = 10;
 
 public:
 	Ship();
@@ -22,6 +23,11 @@ public:
 	void setOrientation(const float orientation) { this->orientation = orientation; }
 	bool getThrust() const { return this->thrust; }
 	void setThrust(const bool thrust) { this->thrust = thrust; }
+	int getRadius() const { return this->radius; }
+
+	void rotateLeft();
+	void rotateRight();
+	void applyThrust();
 
 	void draw();
 };
