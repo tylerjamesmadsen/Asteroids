@@ -18,7 +18,7 @@
 #include "rocks.h"
 #include "ship.h"
 
-#define CLOSE_ENOUGH 15
+//#define CLOSE_ENOUGH 15
 
 
 class Game
@@ -30,9 +30,7 @@ private:
 	Ship ship;
 	std::vector<Bullet> bullets;
 
-	// TODO: rocks
 	std::vector<Rock*> rocks;
-	//std::vector<BigRock> rocks;
 
 public:
 	Game(Point topLeft, Point bottomRight);
@@ -46,6 +44,7 @@ public:
 	void advanceShip();
 	void advanceRocks();
 
+	void breakRock(Rock * pRock);
 	void handleCollisions();
 	void cleanUpZombies();
 

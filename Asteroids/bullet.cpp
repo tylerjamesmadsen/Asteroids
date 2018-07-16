@@ -24,8 +24,10 @@ void Bullet::fire(Point point, Velocity shipVelocity, float angle)
 {
 	this->point = point;
 	this->orientation = angle;
+	//this->velocity.setDx(BULLET_SPEED * (-sin(M_PI / 180.0 * angle)));
+	//this->velocity.setDy(BULLET_SPEED * (cos(M_PI / 180.0 * angle)));
 	this->velocity.setDx(shipVelocity.getDx() + BULLET_SPEED * (-cos(M_PI / 180.0 * angle)));
-	this->velocity.setDy(shipVelocity.getDy() + BULLET_SPEED * (sin(M_PI / 180.0 * angle)));
+	this->velocity.setDy(shipVelocity.getDy() + BULLET_SPEED * (-sin(M_PI / 180.0 * angle)));
 }
 
 void Bullet::draw()

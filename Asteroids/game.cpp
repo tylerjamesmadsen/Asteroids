@@ -13,7 +13,7 @@
 #include <vector>
 #include <cassert>
 
-// These are needed for the getClosestDistance function...
+ // These are needed for the getClosestDistance function...
 #include <limits>
 #include <algorithm>
 using namespace std;
@@ -138,8 +138,62 @@ void Game::advanceRocks()
 	}
 }
 
+void Game::breakRock(Rock * pRock)
+{
+	if (pRock->hit() == "big")
+	{
+		// mediumRock1 velocity
+		Velocity mediumVelocity(pRock->getVelocity().getDx(), pRock->getVelocity().getDy() + 1.0f);
+		MediumRock * mediumRock1 = new MediumRock(pRock->getPoint(), mediumVelocity);
+		// mediumRock2 velocity
+		mediumVelocity.setDy(pRock->getVelocity().getDy() - 1.0f);
+		MediumRock * mediumRock2 = new MediumRock(pRock->getPoint(), mediumVelocity);
+		Velocity smallVelocity(pRock->getVelocity().getDx() + 2.0f, pRock->getVelocity().getDy());
+		SmallRock * smallRock = new SmallRock(pRock->getPoint(), smallVelocity);
+
+		// add the new rocks
+		rocks.push_back(mediumRock1);
+		rocks.push_back(mediumRock2);
+		rocks.push_back(smallRock);
+	}
+
+	if (pRock->hit() == "medium")
+	{
+		// smallRock1 velocity
+		Velocity smallVelocity(pRock->getVelocity().getDx() + 3.0f, pRock->getVelocity().getDy());
+		SmallRock * smallRock1 = new SmallRock(pRock->getPoint(), smallVelocity);
+		// smallRock2 velocity
+		smallVelocity.setDx(pRock->getVelocity().getDy() - 3.0f);
+		SmallRock * smallRock2 = new SmallRock(pRock->getPoint(), smallVelocity);
+
+		rocks.push_back(smallRock1);
+		rocks.push_back(smallRock2);
+	}
+
+	if (pRock->hit() == "small")
+	{
+		// do nothing, the rock just disappears
+	}
+}
+
 void Game::handleCollisions()
 {
+	// ship collision
+	if (ship.isAlive())
+	{
+		for (int j = 0; j < rocks.size(); j++)
+		{
+			if (getClosestDistance(ship, (*rocks[j])) < (*rocks[j]).getRadius())
+			{
+				Rock * pRock = rocks[j];
+				breakRock(pRock);
+				pRock->kill();
+				//ship.kill();
+			}
+		}
+	}
+
+	// bullet collisions
 	for (int i = 0; i < bullets.size(); i++)
 	{
 		if (bullets[i].isAlive())
@@ -147,58 +201,19 @@ void Game::handleCollisions()
 			// this bullet is alive, see if its too close
 			for (int j = 0; j < rocks.size(); j++)
 			{
-				 //check if the rock is at this point (in case it was hit)
-				if (/*rocks[i] != NULL && */(*rocks[j]).isAlive())
+				//check if the rock is at this point (in case it was hit)
+				if ((*rocks[j]).isAlive())
 				{
-					// BTW, this logic could be more sophisiticated, but this will
-					// get the job done for now...
-					/*if (fabs(bullets[i].getPoint().getX() - rocks[i].getPoint().getX()) < CLOSE_ENOUGH
-						&& fabs(bullets[i].getPoint().getY() - rocks[i].getPoint().getY()) < CLOSE_ENOUGH)*/
-					if (getClosestDistance(bullets[i], (*rocks[j])) < CLOSE_ENOUGH)
+					if (getClosestDistance(bullets[i], (*rocks[j])) < (*rocks[j]).getRadius())
 					{
 						// make it easier to use rocks[j]
 						Rock * pRock = rocks[j];
 						// split the rock
- 						if (pRock->hit() == "big")
-						{
-							Velocity mediumVelocity(pRock->getVelocity().getDx(), pRock->getVelocity().getDy() + 1.0f);
-							MediumRock * mediumRock1 = new MediumRock(pRock->getPoint(), mediumVelocity);
-							mediumVelocity.setDy(pRock->getVelocity().getDy() - 1.0f);
-							MediumRock * mediumRock2 = new MediumRock(pRock->getPoint(), mediumVelocity);
-							Velocity smallVelocity(pRock->getVelocity().getDx() + 2.0f, pRock->getVelocity().getDy());
-							SmallRock * smallRock = new SmallRock(pRock->getPoint(), smallVelocity);
+						breakRock(pRock);
 
-							// kill the rock and bullet
-							pRock->kill();
-							bullets[i].kill();
-
-							// add the new rocks
-							rocks.push_back(mediumRock1);
-							rocks.push_back(mediumRock2);
-							rocks.push_back(smallRock);
-						}
-
-						if ((*rocks[j]).hit() == "medium")
-						{
-							Velocity smallVelocity(pRock->getVelocity().getDx() + 3.0f, pRock->getVelocity().getDy());
-							SmallRock * smallRock1 = new SmallRock(pRock->getPoint(), smallVelocity);
-							smallVelocity.setDx(pRock->getVelocity().getDy() + 3.0f);
-							SmallRock * smallRock2 = new SmallRock(pRock->getPoint(), smallVelocity);
-
-							// kill the rock and bullet
-							pRock->kill();
-							bullets[i].kill();
-
-							rocks.push_back(smallRock1);
-							rocks.push_back(smallRock2);
-						}
-
-						if ((*rocks[j]).hit() == "small")
-						{
-							// kill the rock and bullet
-							pRock->kill();
-							bullets[i].kill();
-						}
+						// kill the rock and bullet
+						pRock->kill();
+						bullets[i].kill();
 					}
 				}
 			}
@@ -209,20 +224,59 @@ void Game::handleCollisions()
 
 void Game::cleanUpZombies()
 {
+	// Look for dead bullets
+	vector<Bullet>::iterator bulletIt = bullets.begin();
+	while (bulletIt != bullets.end())
+	{
+		Bullet bullet = *bulletIt;
+		// Asteroids Hint:
+		// If we had a list of pointers, we would need this line instead:
+		//Bullet* pBullet = *bulletIt;
+
+		if (!bullet.isAlive())
+		{
+			// If we had a list of pointers, we would need to delete the memory here...
+
+
+			// remove from list and advance
+			bulletIt = bullets.erase(bulletIt);
+		}
+		else
+		{
+			bulletIt++; // advance
+		}
+	}
+
+	// Look for dead rocks
+	vector<Rock*>::iterator rockIt = rocks.begin();
+	while (rockIt != rocks.end())
+	{
+		Rock * pRock = *rockIt;
+
+		if (!pRock->isAlive())
+		{
+			delete pRock;
+			rockIt = rocks.erase(rockIt);
+		}
+		else
+		{
+			rockIt++; // advance
+		}
+	}
 }
 
 template <class T>
 void Game::wrap(T object)
 {
-	if (object.getPoint().getX() > 200.0f ||
-		object.getPoint().getX() < -200.0f)
+	if (object.getPoint().getX() >= 200.0f ||
+		object.getPoint().getX() <= -200.0f)
 	{
 		object.getPoint().setX(
 			object.getPoint().getX() * -1);
 	}
 
-	if (object.getPoint().getY() > 200.0f ||
-		object.getPoint().getY() < -200.0f)
+	if (object.getPoint().getY() >= 200.0f ||
+		object.getPoint().getY() <= -200.0f)
 	{
 		object.getPoint().setY(
 			object.getPoint().getY() * -1);
@@ -237,30 +291,30 @@ void Game::wrap(T object)
  *   get in between the frames.
  **********************************************************/
 
-float Game :: getClosestDistance(FlyingObject &obj1, FlyingObject &obj2) const
+float Game::getClosestDistance(FlyingObject &obj1, FlyingObject &obj2) const
 {
-   // find the maximum distance traveled
-   float dMax = max(abs(obj1.getVelocity().getDx()), abs(obj1.getVelocity().getDy()));
-   dMax = max(dMax, abs(obj2.getVelocity().getDx()));
-   dMax = max(dMax, abs(obj2.getVelocity().getDy()));
-   dMax = max(dMax, 0.1f); // when dx and dy are 0.0. Go through the loop once.
-   
-   float distMin = std::numeric_limits<float>::max();
-   for (float i = 0.0; i <= dMax; i++)
-   {
-      Point point1(obj1.getPoint().getX() + (obj1.getVelocity().getDx() * i / dMax),
-                     obj1.getPoint().getY() + (obj1.getVelocity().getDy() * i / dMax));
-      Point point2(obj2.getPoint().getX() + (obj2.getVelocity().getDx() * i / dMax),
-                     obj2.getPoint().getY() + (obj2.getVelocity().getDy() * i / dMax));
-      
-      float xDiff = point1.getX() - point2.getX();
-      float yDiff = point1.getY() - point2.getY();
-      
-      float distSquared = (xDiff * xDiff) +(yDiff * yDiff);
-      
-      distMin = min(distMin, distSquared);
-   }
-   
-   return sqrt(distMin);
+	// find the maximum distance traveled
+	float dMax = max(abs(obj1.getVelocity().getDx()), abs(obj1.getVelocity().getDy()));
+	dMax = max(dMax, abs(obj2.getVelocity().getDx()));
+	dMax = max(dMax, abs(obj2.getVelocity().getDy()));
+	dMax = max(dMax, 0.1f); // when dx and dy are 0.0. Go through the loop once.
+
+	float distMin = std::numeric_limits<float>::max();
+	for (float i = 0.0; i <= dMax; i++)
+	{
+		Point point1(obj1.getPoint().getX() + (obj1.getVelocity().getDx() * i / dMax),
+			obj1.getPoint().getY() + (obj1.getVelocity().getDy() * i / dMax));
+		Point point2(obj2.getPoint().getX() + (obj2.getVelocity().getDx() * i / dMax),
+			obj2.getPoint().getY() + (obj2.getVelocity().getDy() * i / dMax));
+
+		float xDiff = point1.getX() - point2.getX();
+		float yDiff = point1.getY() - point2.getY();
+
+		float distSquared = (xDiff * xDiff) + (yDiff * yDiff);
+
+		distMin = min(distMin, distSquared);
+	}
+
+	return sqrt(distMin);
 }
 
