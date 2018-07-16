@@ -26,7 +26,7 @@ Game::Game(Point tl, Point br)
 {
 	for (int i = 0; i < 5; i++)
 	{
-		BigRock bigRock;
+		BigRock * bigRock = new BigRock();
 		rocks.push_back(bigRock);
 	}
 }
@@ -90,9 +90,9 @@ void Game::draw(const Interface & pUI)
 
 	for (int i = 0; i < rocks.size(); i++)
 	{
-		if (rocks[i].isAlive())
+		if ((*rocks[i]).isAlive())
 		{
-			rocks[i].draw();
+			(*rocks[i]).draw();
 		}
 	}
 }
@@ -128,12 +128,12 @@ void Game::advanceRocks()
 {
 	for (int i = 0; i < rocks.size(); i++)
 	{
-		if (rocks[i].isAlive())
+		if ((*rocks[i]).isAlive())
 		{
 			// this bullet is alive, so tell it to move forward
-			rocks[i].advance();
+			(*rocks[i]).advance();
 			// TODO: wrapping
-			wrap(rocks[i]);
+			//wrap(rocks[i]);
 		}
 	}
 }
@@ -148,40 +148,57 @@ void Game::handleCollisions()
 			for (int j = 0; j < rocks.size(); j++)
 			{
 				 //check if the rock is at this point (in case it was hit)
-				if (/*rocks[i] != NULL && */rocks[j].isAlive())
+				if (/*rocks[i] != NULL && */(*rocks[j]).isAlive())
 				{
 					// BTW, this logic could be more sophisiticated, but this will
 					// get the job done for now...
 					/*if (fabs(bullets[i].getPoint().getX() - rocks[i].getPoint().getX()) < CLOSE_ENOUGH
 						&& fabs(bullets[i].getPoint().getY() - rocks[i].getPoint().getY()) < CLOSE_ENOUGH)*/
-					if (getClosestDistance(bullets[i], rocks[j]) < CLOSE_ENOUGH)
+					if (getClosestDistance(bullets[i], (*rocks[j])) < CLOSE_ENOUGH)
 					{
-						//we have a hit!
-
+						// make it easier to use rocks[j]
+						Rock * pRock = rocks[j];
 						// split the rock
-						if (rocks[j].hit() == "big")
+ 						if (pRock->hit() == "big")
 						{
-							/*MediumRock mediumRock1(rocks[i].getPoint(), rocks[i].getVelocity());
-							mediumRock1.getVelocity().setDy(mediumRock1.getVelocity().getDy() + 1);
-							MediumRock mediumRock2(rocks[i].getPoint(), rocks[i].getVelocity());
-							mediumRock1.getVelocity().setDy(mediumRock2.getVelocity().getDy() - 1);
-							SmallRock smallRock(rocks[i].getPoint(), rocks[i].getVelocity());
-							smallRock.getVelocity().setDx(smallRock.getVelocity().getDx() + 2);*/
+							Velocity mediumVelocity(pRock->getVelocity().getDx(), pRock->getVelocity().getDy() + 1.0f);
+							MediumRock * mediumRock1 = new MediumRock(pRock->getPoint(), mediumVelocity);
+							mediumVelocity.setDy(pRock->getVelocity().getDy() - 1.0f);
+							MediumRock * mediumRock2 = new MediumRock(pRock->getPoint(), mediumVelocity);
+							Velocity smallVelocity(pRock->getVelocity().getDx() + 2.0f, pRock->getVelocity().getDy());
+							SmallRock * smallRock = new SmallRock(pRock->getPoint(), smallVelocity);
+
+							// kill the rock and bullet
+							pRock->kill();
+							bullets[i].kill();
+
+							// add the new rocks
+							rocks.push_back(mediumRock1);
+							rocks.push_back(mediumRock2);
+							rocks.push_back(smallRock);
 						}
 
-						if (rocks[j].hit() == "medium")
+						if ((*rocks[j]).hit() == "medium")
 						{
+							Velocity smallVelocity(pRock->getVelocity().getDx() + 3.0f, pRock->getVelocity().getDy());
+							SmallRock * smallRock1 = new SmallRock(pRock->getPoint(), smallVelocity);
+							smallVelocity.setDx(pRock->getVelocity().getDy() + 3.0f);
+							SmallRock * smallRock2 = new SmallRock(pRock->getPoint(), smallVelocity);
 
+							// kill the rock and bullet
+							pRock->kill();
+							bullets[i].kill();
+
+							rocks.push_back(smallRock1);
+							rocks.push_back(smallRock2);
 						}
 
-						if (rocks[j].hit() == "small")
+						if ((*rocks[j]).hit() == "small")
 						{
-
+							// kill the rock and bullet
+							pRock->kill();
+							bullets[i].kill();
 						}
-
-						// kill the rock and bullet
-						bullets[i].kill();
-						rocks[j].kill();
 					}
 				}
 			}

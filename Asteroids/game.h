@@ -31,8 +31,8 @@ private:
 	std::vector<Bullet> bullets;
 
 	// TODO: rocks
-	//std::vector<Rock> rocks;
-	std::vector<BigRock> rocks;
+	std::vector<Rock*> rocks;
+	//std::vector<BigRock> rocks;
 
 public:
 	Game(Point topLeft, Point bottomRight);
