@@ -48,8 +48,7 @@ public:
 	void handleCollisions();
 	void cleanUpZombies();
 
-	template <class T>
-	void wrap(T object);
+	void wrap(FlyingObject & object);
 };
 
 

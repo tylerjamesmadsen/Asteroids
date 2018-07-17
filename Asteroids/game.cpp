@@ -65,7 +65,7 @@ void Game::handleInput(const Interface & pUI)
 	}
 
 	// shoot bullets
-	if (pUI.isSpace())
+	if (pUI.isSpace() && ship.isAlive())
 	{
 		Bullet newBullet;
 		newBullet.fire(ship.getPoint(), ship.getVelocity(), (float)(ship.getOrientation() - 90));
@@ -106,11 +106,17 @@ void Game::advanceBullets()
 	// Move each of the bullets forward if it is alive
 	for (int i = 0; i < bullets.size(); i++)
 	{
-		if (bullets[i].isAlive())
+		if (bullets[i].getLife() <= 0)
+		{
+			bullets[i].kill();
+			assert(!bullets[i].isAlive());
+		}
+		else if (bullets[i].isAlive())
 		{
 			// this bullet is alive, so tell it to move forward
 			bullets[i].advance();
 			wrap(bullets[i]);
+			bullets[i].setLife(bullets[i].getLife() - 1);
 		}
 	}
 }
@@ -128,12 +134,13 @@ void Game::advanceRocks()
 {
 	for (int i = 0; i < rocks.size(); i++)
 	{
-		if ((*rocks[i]).isAlive())
+		if (rocks[i]->isAlive())
 		{
+			rocks[i]->setRotation(rocks[i]->getRotation() + rocks[i]->getRotationAmount());
 			// this bullet is alive, so tell it to move forward
-			(*rocks[i]).advance();
+			rocks[i]->advance();
 			// TODO: wrapping
-			//wrap(rocks[i]);
+			wrap(*rocks[i]);
 		}
 	}
 }
@@ -155,6 +162,9 @@ void Game::breakRock(Rock * pRock)
 		rocks.push_back(mediumRock1);
 		rocks.push_back(mediumRock2);
 		rocks.push_back(smallRock);
+
+		// add another large rock
+		rocks.push_back(new BigRock());
 	}
 
 	if (pRock->hit() == "medium")
@@ -188,7 +198,7 @@ void Game::handleCollisions()
 				Rock * pRock = rocks[j];
 				breakRock(pRock);
 				pRock->kill();
-				//ship.kill();
+				ship.kill();
 			}
 		}
 	}
@@ -265,21 +275,22 @@ void Game::cleanUpZombies()
 	}
 }
 
-template <class T>
-void Game::wrap(T object)
+void Game::wrap(FlyingObject & object)
 {
 	if (object.getPoint().getX() >= 200.0f ||
 		object.getPoint().getX() <= -200.0f)
 	{
-		object.getPoint().setX(
-			object.getPoint().getX() * -1);
+		float newX = object.getPoint().getX() * -1;
+		Point newPoint(newX, object.getPoint().getY());
+		object.setPoint(newPoint);
 	}
 
 	if (object.getPoint().getY() >= 200.0f ||
 		object.getPoint().getY() <= -200.0f)
 	{
-		object.getPoint().setY(
-			object.getPoint().getY() * -1);
+		float newY = object.getPoint().getY() * -1;
+		Point newPoint(object.getPoint().getX(), newY);
+		object.setPoint(newPoint);
 	}
 }
 
